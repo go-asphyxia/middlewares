@@ -12,6 +12,16 @@ import (
 )
 
 type (
+	TokenGeneratorConfiguration struct {
+		Key string
+
+		SignatureLength int
+		RefreshLength   int
+
+		TokenExpires   int
+		RefreshExpires int
+	}
+
 	TokenGeneratorClaims[T any] struct {
 		jwt.StandardClaims
 
@@ -29,13 +39,13 @@ type (
 	}
 )
 
-func NewTokenGenerator[T any](generator *arandom.Generator, key string, signatureLength, refreshLength, tokenExpires, refreshExpires int) (tg *TokenGenerator[T]) {
+func NewTokenGenerator[T any](generator *arandom.Generator, c *TokenGeneratorConfiguration) (tg *TokenGenerator[T]) {
 	tg = &TokenGenerator[T]{
-		TokenSignature:   generator.Bytes(signatureLength, arandom.DefaultCharset),
-		RefreshSignature: generator.Bytes(refreshLength, arandom.DefaultCharset),
+		TokenSignature:   generator.Bytes(c.SignatureLength, arandom.DefaultCharset),
+		RefreshSignature: generator.Bytes(c.RefreshLength, arandom.DefaultCharset),
 
-		TokenExpires:   time.Minute * time.Duration(tokenExpires),
-		RefreshExpires: time.Minute * time.Duration(refreshExpires),
+		TokenExpires:   time.Minute * time.Duration(c.TokenExpires),
+		RefreshExpires: time.Minute * time.Duration(c.RefreshExpires),
 	}
 
 	return
