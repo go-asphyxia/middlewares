@@ -5,6 +5,7 @@ import (
 
 	"github.com/valyala/fasthttp"
 
+	aconversion "github.com/go-asphyxia/conversion"
 	aheaders "github.com/go-asphyxia/http/headers"
 )
 
@@ -25,34 +26,44 @@ func NewCORS(hosts []string, methods, headers []string) (cors *CORS) {
 }
 
 func (cors *CORS) Middleware(source fasthttp.RequestHandler) (target fasthttp.RequestHandler) {
-	hosts := strings.Join(cors.Hosts, ",")
 	m := strings.Join(cors.Methods, ",")
 	h := strings.Join(cors.Headers, ",")
 
 	target = func(ctx *fasthttp.RequestCtx) {
-		headers := &ctx.Response.Header
+		host := aconversion.BytesToStringNoCopy(ctx.Request.Host())
 
-		headers.Set(aheaders.AccessControlAllowOrigin, hosts)
-		headers.Set(aheaders.AccessControlAllowMethods, m)
-		headers.Set(aheaders.AccessControlAllowHeaders, h)
+		for i := range cors.Hosts {
+			if cors.Headers[i] == host {
+				headers := &ctx.Response.Header
 
-		source(ctx)
+				headers.Set(aheaders.AccessControlAllowOrigin, host)
+				headers.Set(aheaders.AccessControlAllowMethods, m)
+				headers.Set(aheaders.AccessControlAllowHeaders, h)
+
+				source(ctx)
+			}
+		}
 	}
 
 	return
 }
 
 func (cors *CORS) Handler() (handler fasthttp.RequestHandler) {
-	hosts := strings.Join(cors.Hosts, ",")
 	m := strings.Join(cors.Methods, ",")
 	h := strings.Join(cors.Headers, ",")
 
 	handler = func(ctx *fasthttp.RequestCtx) {
-		headers := &ctx.Response.Header
+		host := aconversion.BytesToStringNoCopy(ctx.Request.Host())
 
-		headers.Set(aheaders.AccessControlAllowOrigin, hosts)
-		headers.Set(aheaders.AccessControlAllowMethods, m)
-		headers.Set(aheaders.AccessControlAllowHeaders, h)
+		for i := range cors.Hosts {
+			if cors.Headers[i] == host {
+				headers := &ctx.Response.Header
+
+				headers.Set(aheaders.AccessControlAllowOrigin, host)
+				headers.Set(aheaders.AccessControlAllowMethods, m)
+				headers.Set(aheaders.AccessControlAllowHeaders, h)
+			}
+		}
 	}
 
 	return
