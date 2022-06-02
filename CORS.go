@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"bytes"
 	"strings"
 
 	"github.com/valyala/fasthttp"
@@ -29,8 +30,10 @@ func (cors *CORS) Middleware(source fasthttp.RequestHandler) (target fasthttp.Re
 	m := strings.Join(cors.Methods, ",")
 	h := strings.Join(cors.Headers, ",")
 
+	prefix := []byte("https://")
+
 	target = func(ctx *fasthttp.RequestCtx) {
-		origin := aconversion.BytesToStringNoCopy(ctx.Request.Header.Peek(aheaders.Origin))
+		origin := aconversion.BytesToStringNoCopy(bytes.TrimPrefix(ctx.Request.Header.Peek(aheaders.Origin), prefix))
 
 		for i := range cors.Origins {
 			if cors.Origins[i] == origin {
@@ -52,8 +55,10 @@ func (cors *CORS) Handler() (handler fasthttp.RequestHandler) {
 	m := strings.Join(cors.Methods, ",")
 	h := strings.Join(cors.Headers, ",")
 
+	prefix := []byte("https://")
+
 	handler = func(ctx *fasthttp.RequestCtx) {
-		origin := aconversion.BytesToStringNoCopy(ctx.Request.Header.Peek(aheaders.Origin))
+		origin := aconversion.BytesToStringNoCopy(bytes.TrimPrefix(ctx.Request.Header.Peek(aheaders.Origin), prefix))
 
 		for i := range cors.Origins {
 			if cors.Origins[i] == origin {
