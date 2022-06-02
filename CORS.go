@@ -11,13 +11,13 @@ import (
 
 type (
 	CORS struct {
-		Hosts, Methods, Headers []string
+		Origins, Methods, Headers []string
 	}
 )
 
-func NewCORS(hosts []string, methods, headers []string) (cors *CORS) {
+func NewCORS(origins []string, methods, headers []string) (cors *CORS) {
 	cors = &CORS{
-		Hosts:   hosts,
+		Origins: origins,
 		Methods: methods,
 		Headers: headers,
 	}
@@ -30,13 +30,13 @@ func (cors *CORS) Middleware(source fasthttp.RequestHandler) (target fasthttp.Re
 	h := strings.Join(cors.Headers, ",")
 
 	target = func(ctx *fasthttp.RequestCtx) {
-		host := aconversion.BytesToStringNoCopy(ctx.Request.Host())
+		origin := aconversion.BytesToStringNoCopy(ctx.Request.Header.Peek(aheaders.Origin))
 
-		for i := range cors.Hosts {
-			if cors.Hosts[i] == host {
+		for i := range cors.Origins {
+			if cors.Origins[i] == origin {
 				headers := &ctx.Response.Header
 
-				headers.Set(aheaders.AccessControlAllowOrigin, host)
+				headers.Set(aheaders.AccessControlAllowOrigin, origin)
 				headers.Set(aheaders.AccessControlAllowMethods, m)
 				headers.Set(aheaders.AccessControlAllowHeaders, h)
 
@@ -53,13 +53,13 @@ func (cors *CORS) Handler() (handler fasthttp.RequestHandler) {
 	h := strings.Join(cors.Headers, ",")
 
 	handler = func(ctx *fasthttp.RequestCtx) {
-		host := aconversion.BytesToStringNoCopy(ctx.Request.Host())
+		origin := aconversion.BytesToStringNoCopy(ctx.Request.Header.Peek(aheaders.Origin))
 
-		for i := range cors.Hosts {
-			if cors.Hosts[i] == host {
+		for i := range cors.Origins {
+			if cors.Origins[i] == origin {
 				headers := &ctx.Response.Header
 
-				headers.Set(aheaders.AccessControlAllowOrigin, host)
+				headers.Set(aheaders.AccessControlAllowOrigin, origin)
 				headers.Set(aheaders.AccessControlAllowMethods, m)
 				headers.Set(aheaders.AccessControlAllowHeaders, h)
 			}
