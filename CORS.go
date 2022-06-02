@@ -39,7 +39,7 @@ func (cors *CORS) Middleware(source fasthttp.RequestHandler) (target fasthttp.Re
 
 			headers.SetBytesV(aheaders.AccessControlAllowOrigin, host)
 			headers.Set(aheaders.AccessControlAllowMethods, m)
-			headers.Set(aheaders.AccessControlAllowMethods, h)
+			headers.Set(aheaders.AccessControlAllowHeaders, h)
 
 			source(ctx)
 		}
