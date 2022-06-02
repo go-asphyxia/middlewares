@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"bytes"
 	"strings"
 
 	"github.com/valyala/fasthttp"
@@ -12,6 +11,7 @@ import (
 
 type (
 	CORS struct {
+		Scheme                    string
 		Origins, Methods, Headers []string
 	}
 )
@@ -27,16 +27,20 @@ func NewCORS(origins []string, methods, headers []string) (cors *CORS) {
 }
 
 func (cors *CORS) Middleware(source fasthttp.RequestHandler) (target fasthttp.RequestHandler) {
+	o := make([]string, len(cors.Origins))
+
+	for i := range cors.Origins {
+		o = append(o, ("http://" + cors.Origins[i]), ("https://" + cors.Origins[i]))
+	}
+
 	m := strings.Join(cors.Methods, ",")
 	h := strings.Join(cors.Headers, ",")
 
-	prefix := []byte("https://")
-
 	target = func(ctx *fasthttp.RequestCtx) {
-		origin := aconversion.BytesToStringNoCopy(bytes.TrimPrefix(ctx.Request.Header.Peek(aheaders.Origin), prefix))
+		origin := aconversion.BytesToStringNoCopy(ctx.Request.Header.Peek(aheaders.Origin))
 
-		for i := range cors.Origins {
-			if cors.Origins[i] == origin {
+		for i := range o {
+			if o[i] == origin {
 				headers := &ctx.Response.Header
 
 				headers.Set(aheaders.AccessControlAllowOrigin, origin)
@@ -52,16 +56,20 @@ func (cors *CORS) Middleware(source fasthttp.RequestHandler) (target fasthttp.Re
 }
 
 func (cors *CORS) Handler() (handler fasthttp.RequestHandler) {
+	o := make([]string, len(cors.Origins))
+
+	for i := range cors.Origins {
+		o = append(o, ("http://" + cors.Origins[i]), ("https://" + cors.Origins[i]))
+	}
+
 	m := strings.Join(cors.Methods, ",")
 	h := strings.Join(cors.Headers, ",")
 
-	prefix := []byte("https://")
-
 	handler = func(ctx *fasthttp.RequestCtx) {
-		origin := aconversion.BytesToStringNoCopy(bytes.TrimPrefix(ctx.Request.Header.Peek(aheaders.Origin), prefix))
+		origin := aconversion.BytesToStringNoCopy(ctx.Request.Header.Peek(aheaders.Origin))
 
-		for i := range cors.Origins {
-			if cors.Origins[i] == origin {
+		for i := range o {
+			if o[i] == origin {
 				headers := &ctx.Response.Header
 
 				headers.Set(aheaders.AccessControlAllowOrigin, origin)
