@@ -33,7 +33,7 @@ func (cors *CORS) Middleware(source fasthttp.RequestHandler) (target fasthttp.Re
 		host := aconversion.BytesToStringNoCopy(ctx.Request.Host())
 
 		for i := range cors.Hosts {
-			if cors.Headers[i] == host {
+			if cors.Hosts[i] == host {
 				headers := &ctx.Response.Header
 
 				headers.Set(aheaders.AccessControlAllowOrigin, host)
@@ -56,7 +56,7 @@ func (cors *CORS) Handler() (handler fasthttp.RequestHandler) {
 		host := aconversion.BytesToStringNoCopy(ctx.Request.Host())
 
 		for i := range cors.Hosts {
-			if cors.Headers[i] == host {
+			if cors.Hosts[i] == host {
 				headers := &ctx.Response.Header
 
 				headers.Set(aheaders.AccessControlAllowOrigin, host)
