@@ -27,10 +27,16 @@ func NewCORS(origins []string, methods, headers []string) (cors *CORS) {
 }
 
 func (cors *CORS) Middleware(source fasthttp.RequestHandler) (target fasthttp.RequestHandler) {
-	o := make([]string, len(cors.Origins))
+	o := []string(nil)
 
-	for i := range cors.Origins {
-		o = append(o, ("http://" + cors.Origins[i]), ("https://" + cors.Origins[i]))
+	if cors.Origins != nil {
+		o = make([]string, (len(cors.Origins) * 2))
+
+		for i := range cors.Origins {
+			o = append(o, ("http://" + cors.Origins[i]), ("https://" + cors.Origins[i]))
+		}
+	} else {
+		o = []string{"*"}
 	}
 
 	m := strings.Join(cors.Methods, ",")
@@ -56,10 +62,16 @@ func (cors *CORS) Middleware(source fasthttp.RequestHandler) (target fasthttp.Re
 }
 
 func (cors *CORS) Handler() (handler fasthttp.RequestHandler) {
-	o := make([]string, len(cors.Origins))
+	o := []string(nil)
 
-	for i := range cors.Origins {
-		o = append(o, ("http://" + cors.Origins[i]), ("https://" + cors.Origins[i]))
+	if cors.Origins != nil {
+		o = make([]string, (len(cors.Origins) * 2))
+
+		for i := range cors.Origins {
+			o = append(o, ("http://" + cors.Origins[i]), ("https://" + cors.Origins[i]))
+		}
+	} else {
+		o = []string{"*"}
 	}
 
 	m := strings.Join(cors.Methods, ",")
