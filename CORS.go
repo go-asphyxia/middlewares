@@ -47,10 +47,10 @@ func (cors *CORS) Middleware(source fasthttp.RequestHandler) (target fasthttp.Re
 
 			for i := range o {
 				if o[i] == origin {
-
 					headers.Set(aheaders.AccessControlAllowOrigin, origin)
 
 					source(ctx)
+					return
 				}
 			}
 		}
@@ -92,8 +92,8 @@ func (cors *CORS) Handler() (handler fasthttp.RequestHandler) {
 
 			for i := range o {
 				if o[i] == origin {
-
 					headers.Set(aheaders.AccessControlAllowOrigin, origin)
+					return
 				}
 			}
 		}
