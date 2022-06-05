@@ -43,15 +43,17 @@ func (cors *CORS) Middleware(source fasthttp.RequestHandler) (target fasthttp.Re
 	h := strings.Join(cors.Headers, ",")
 
 	target = func(ctx *fasthttp.RequestCtx) {
+		headers := &ctx.Response.Header
+
+		headers.Set(aheaders.AccessControlAllowMethods, m)
+		headers.Set(aheaders.AccessControlAllowHeaders, h)
+
 		origin := aconversion.BytesToStringNoCopy(ctx.Request.Header.Peek(aheaders.Origin))
 
 		for i := range o {
 			if o[i] == origin {
-				headers := &ctx.Response.Header
 
 				headers.Set(aheaders.AccessControlAllowOrigin, origin)
-				headers.Set(aheaders.AccessControlAllowMethods, m)
-				headers.Set(aheaders.AccessControlAllowHeaders, h)
 
 				source(ctx)
 			}
@@ -78,15 +80,16 @@ func (cors *CORS) Handler() (handler fasthttp.RequestHandler) {
 	h := strings.Join(cors.Headers, ",")
 
 	handler = func(ctx *fasthttp.RequestCtx) {
+		headers := &ctx.Response.Header
+
+		headers.Set(aheaders.AccessControlAllowMethods, m)
+		headers.Set(aheaders.AccessControlAllowHeaders, h)
+
 		origin := aconversion.BytesToStringNoCopy(ctx.Request.Header.Peek(aheaders.Origin))
 
 		for i := range o {
 			if o[i] == origin {
-				headers := &ctx.Response.Header
-
 				headers.Set(aheaders.AccessControlAllowOrigin, origin)
-				headers.Set(aheaders.AccessControlAllowMethods, m)
-				headers.Set(aheaders.AccessControlAllowHeaders, h)
 			}
 		}
 	}
