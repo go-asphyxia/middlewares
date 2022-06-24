@@ -41,6 +41,8 @@ type (
 
 func NewTokenGenerator[T any](generator *arandom.Generator, c *TokenGeneratorConfiguration) (tg *TokenGenerator[T]) {
 	tg = &TokenGenerator[T]{
+		Key: c.Key,
+
 		TokenSignature:   generator.Bytes(c.SignatureLength, arandom.DefaultCharset),
 		RefreshSignature: generator.Bytes(c.RefreshLength, arandom.DefaultCharset),
 
@@ -60,7 +62,6 @@ func (tg *TokenGenerator[T]) JWT(source fasthttp.RequestHandler) (target fasthtt
 		authorization := aconversion.BytesToStringNoCopy((&ctx.Request.Header).Peek(aheaders.Authorization))
 
 		t, err := parser.ParseWithClaims(authorization, tgce, tg.TokenFunction)
-
 		if err != nil {
 			ctx.Error(err.Error(), fasthttp.StatusUnauthorized)
 			return
